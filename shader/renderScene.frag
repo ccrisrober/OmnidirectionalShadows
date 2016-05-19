@@ -6,8 +6,7 @@ in vec3 outPosition;
 in vec3 outNormal;
 in vec2 outUV;
 
-uniform sampler2D diffuseTexture;
-uniform samplerCube depthMap;
+uniform samplerCube depthCubeMap;
 
 uniform vec3 lightPosition;
 uniform vec3 lightColor;
@@ -25,7 +24,14 @@ uniform bool reverse;
 vec3 lightPosView;
 
 float calculateShadow() {
-    return 1.0;
+    vec3 L = outPosition - lightPosition; 
+    float closestDepth = texture(depthCubeMap, L).r;
+	closestDepth *= far; 
+	float currentDepth = length(L);
+    float bias = 0.15; 
+    float shadow = currentDepth -  bias > closestDepth ? 1.0 : 0.0;
+
+    return shadow;
 }
 
 void main() { 

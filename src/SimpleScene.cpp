@@ -59,8 +59,8 @@ void SimpleScene::compileAndLinkShader() {
 	simpleShader.compile_and_link();
 
 	simpleShader.use();
-	simpleShader.add_uniform("depthMap");
-	simpleShader.send_uniform("depthMap", 0);
+	simpleShader.add_uniform("depthCubeMap");
+	simpleShader.send_uniform("depthCubeMap", 0);
 
 	simpleShader.add_uniform("viewProjection");
 	simpleShader.add_uniform("model");
@@ -105,7 +105,7 @@ void SimpleScene::drawScene(SimpleGLShader& shader) {
 	int n = 0;
 	glDisable(GL_CULL_FACE);
 	glm::mat4 model;
-	model = glm::scale(model, glm::vec3(25.0));
+	model = glm::scale(model, glm::vec3(10.0));
 	shader.send_uniform_b("reverse", true);
 	shader.send_uniform("model", model);
 	shader.send_uniform("Color", colors[n++ % colors.size()]);
@@ -124,6 +124,7 @@ void SimpleScene::drawScene(SimpleGLShader& shader) {
 	shader.send_uniform("Color", colors[n++ % colors.size()]);
 	cube->render();
 
+	// G3D Code (Marcos García Lorenzo)
 	std::srand(31415926);
 	for (unsigned int i = 0; i < 20; i++) {
 		float size = float(std::rand() % 3 + 1);
