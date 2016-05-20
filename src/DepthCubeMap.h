@@ -72,7 +72,7 @@ public:
 		glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
 	}
 public:
-	const GLuint SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+	const GLuint SHADOW_WIDTH = 1720, SHADOW_HEIGHT = 1720;
 	GLuint depthMapFBO;
 	GLuint depthCubemap;
 	GLfloat near = 1.0f;
