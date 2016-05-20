@@ -24,9 +24,19 @@ protected:
 
 public:
 	std::vector<glm::vec3> colors;
-	SimpleScene(int w, int h);
+	SimpleScene(int w, int h, int numObjects = 5);
 	~SimpleScene();
-	RenderObject *cube, *plane;
+	RenderObject *object1, *object2, *object3;
+
+	int numObjects = 5;
+	int objectsInScene() { return numObjects; }
+	void addNewObject() {
+		numObjects++;
+	}
+	void removeObject() {
+		if (numObjects > 1)
+			numObjects--;
+	}
 
 	DepthCubeMap depthCubeMap;
 
@@ -43,10 +53,12 @@ public:
 	glm::mat4 shadowProjection;
 
 	glm::vec3 lightPosition;
+	glm::vec3 lightColor;
 
 	SimpleGLShader simpleShader;
 
 	RenderObject* sphere;
+	int randomNumber;
 };
 
 #endif // _SIMPLE_SCENE_H

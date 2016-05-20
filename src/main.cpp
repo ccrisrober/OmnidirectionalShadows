@@ -15,6 +15,7 @@ Camera camera(glm::vec3(-5.0f, 2.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f), -1.75f,
 GLfloat lastX = WINDOW_WIDTH / 2.0;
 GLfloat lastY = WINDOW_HEIGHT / 2.0;
 bool    keys[1024];
+bool	keyRepeat[1024];
 
 IScene *scene;
 GLFWwindow * window;
@@ -28,10 +29,15 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	if (key >= 0 && key < 1024) {
-		if (action == GLFW_PRESS)
+		if (action == GLFW_PRESS) {
 			keys[key] = true;
-		else if (action == GLFW_RELEASE)
+			keyRepeat[key] = true;
+		} else if (action == GLFW_PRESS)
+			keys[key] = true;
+		else if (action == GLFW_RELEASE) {
 			keys[key] = false;
+			//keyRepeat[key] = false;
+		}
 	}
 }
 
@@ -53,6 +59,18 @@ void do_movement() {
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	if (keys[GLFW_KEY_X])
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	if (keyRepeat[GLFW_KEY_M]) {
+		((SimpleScene*)scene)->addNewObject();
+		keyRepeat[GLFW_KEY_M] = false;
+	}
+	if (keyRepeat[GLFW_KEY_N]) {
+		((SimpleScene*)scene)->removeObject();
+		keyRepeat[GLFW_KEY_N] = false;
+	}
+	if (keyRepeat[GLFW_KEY_P]) {
+		scene->animate(!scene->animating());
+		keyRepeat[GLFW_KEY_P] = false;
+	}
 }
 
 bool firstMouse = true;
@@ -106,6 +124,7 @@ void mainLoop() {
 			strm << title;
 			strm.precision(4);
 			strm << " [FPS: " << fps << "]";
+			strm << " Num. objects: " << ((SimpleScene*)scene)->objectsInScene();
 			glfwSetWindowTitle(window, strm.str().c_str());
 		}
 	}
@@ -121,7 +140,7 @@ void window_size_callback(GLFWwindow* window, int w, int h) {
 	resizeGL(w, h);
 }
 
-int main() {
+int main(int argc, char** argv) {
 	glfwInit();
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -138,11 +157,16 @@ int main() {
 	glfwSetWindowSizeCallback(window, window_size_callback);
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwWindowHint(GLFW_DEPTH_BITS, 64);
 
 	glewExperimental = GL_TRUE;
 	glewInit();
 
-	scene = new SimpleScene(WINDOW_WIDTH, WINDOW_HEIGHT);
+	int numObjs = 10;
+	if (argc > 1) {
+		numObjs = atoi(argv[1]);
+	}
+	scene = new SimpleScene(WINDOW_WIDTH, WINDOW_HEIGHT, numObjs);
 	scene->initScene();
 
 	camera.screenWidth = WINDOW_WIDTH;

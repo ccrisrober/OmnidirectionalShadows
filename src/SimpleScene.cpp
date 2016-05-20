@@ -9,7 +9,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/constants.hpp"
 
-SimpleScene::SimpleScene(int w, int h) : IScene(w, h) { }
+SimpleScene::SimpleScene(int w, int h, int numObjects) : IScene(w, h), numObjects(numObjects) { }
 SimpleScene::~SimpleScene() {
 }
 
@@ -17,19 +17,24 @@ void SimpleScene::initScene() {
 	compileAndLinkShader();
 	glClearColor(0.5f,0.5f,0.5f,1.0f);
 
-	cube = new Mesh("../models/monkeyhead.obj");
-	plane = new Mesh("../models/plane.obj");
+	object1 = new Mesh("../models/DarthVader.obj");
+	object2 = new Mesh("../models/torus.obj");
+	object3 = new Mesh("../models/monkeyhead.obj");
 	lightPosition = glm::vec3(0.0f, 2.5f, 0.0f);
+	lightColor = glm::vec3(1.0, 1.0, 1.0);
 
 	sphere = new Mesh("../models/sphere.obj");
 
 	srand(time(NULL));
-	for(int i = 0; i < 30; i++) {
+	for(int i = 0; i < 38; i++) {
 		float r = ((float)( std::rand() % 1000)) * 0.001;
+		r = r < 0.1 ? 0.2 : r;
 		float g = ((float)( std::rand() % 1000)) * 0.001;
 		float b = ((float)( std::rand() % 1000)) * 0.001;
 		colors.push_back(glm::vec3(r, g, b));
 	}
+
+	randomNumber = std::rand();
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
@@ -38,9 +43,11 @@ void SimpleScene::initScene() {
 
 
 void SimpleScene::update( float t ) {
-	//angle += 0.1 * t;
-	angle = (angle > 3.141592f * 2.0f) ? 0 : angle + 0.001f / 3 * t;
-	lightPosition.z = sin(glfwGetTime() * 0.5) * 3.0;
+	if (animating()) {
+		angle = (angle > 3.141592f * 2.0f) ? 0 : angle + 0.001f / 3 * t;
+		lightPosition.x = sin(glfwGetTime() * 0.5) * 5.0;
+		lightPosition.z = cos(glfwGetTime() * 0.5) * 5.0;
+	}
 }
 
 void SimpleScene::draw(Camera* camera) {
@@ -75,7 +82,6 @@ void SimpleScene::compileAndLinkShader() {
 	simpleShader.send_uniform_b("cartoon", true);
 }
 void SimpleScene::draw1() {
-	lightPosition.z = cos(glfwGetTime() * 0.1) * 5.0;
 	depthCubeMap.use(lightPosition);
 	drawScene(depthCubeMap.shadowShader);
 	depthCubeMap.unuse();
@@ -97,9 +103,9 @@ void SimpleScene::draw2(Camera* camera) {
 	drawScene(simpleShader);
 }
 void SimpleScene::drawScene(SimpleGLShader& shader) {
-	static bool drawCube = true;
+	static bool drawobject1 = true;
 
-	drawCube = !drawCube;
+	drawobject1 = !drawobject1;
 
 	shader.send_uniform_b("enableShadows", true);
 	int n = 0;
@@ -112,21 +118,15 @@ void SimpleScene::drawScene(SimpleGLShader& shader) {
 	sphere->render();
 	shader.send_uniform_b("reverse", false);
 
-	if (drawCube) {
+	if (drawobject1) {
 		glEnable(GL_CULL_FACE);
 	}
 
 	shader.send_uniform_b("cartoon", true);
-	model = glm::mat4();
-	model = glm::scale(model, glm::vec3(1.0f / (0.7f)));
-	model = glm::rotate(model, angle, glm::vec3(1.0f, 1.0f, 0.0f));
-	shader.send_uniform("model", model);
-	shader.send_uniform("Color", colors[n++ % colors.size()]);
-	cube->render();
 
 	// G3D Code (Marcos García Lorenzo)
-	std::srand(31415926);
-	for (unsigned int i = 0; i < 20; i++) {
+	std::srand(randomNumber);
+	for (unsigned int i = 0; i < numObjects; i++) {
 		float size = float(std::rand() % 3 + 1);
 
 		glm::vec3 axis(glm::vec3(float(std::rand() % 2),
@@ -147,16 +147,27 @@ void SimpleScene::drawScene(SimpleGLShader& shader) {
 		model = glm::scale(model, glm::vec3(1.0f / (size*0.7f)));
 		shader.send_uniform("model", model);
 		shader.send_uniform("Color", colors[n++ % colors.size()]);
-		cube->render();
+		switch (i % 3) {
+		case 0:
+			object1->render();
+			break;
+		case 1:
+			object2->render();
+			break;
+		case 2:
+			object3->render();
+			break;
+		}
 	}
 
-	if (drawCube) {
+	if (drawobject1) {
 		shader.send_uniform_b("cartoon", false);
 		model = glm::translate(glm::mat4(), lightPosition);
+		model = glm::scale(model, glm::vec3(0.2));
 		shader.send_uniform("model", model);
-		shader.send_uniform("Color", glm::vec3(1.0, 1.0, 0.0));
+		shader.send_uniform("Color", lightColor);
 		shader.send_uniform_b("enableShadows", false);
-		shader.send_uniform("lightColor", glm::vec3(1.0, 1.0, 0.0));
+		shader.send_uniform("lightColor", lightColor);
 		sphere->render();
 		shader.send_uniform_b("cartoon", true);
 	}
