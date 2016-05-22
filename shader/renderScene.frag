@@ -1,4 +1,4 @@
-#version 430
+#version 430 core
 
 //#define ONLY_SHADOW
 
@@ -67,7 +67,7 @@ float calculateShadowValue() {
     float vShadowSample = texture(depthCubeMap, L).r;
     vShadowSample *= far;
     shadow = currentDepth - bias > vShadowSample ? 1.0 : 0.0;
-	outColor = vec4(vec3(vShadowSample/far), 1.0);
+	outColor = vec4(sqrt(vec3(vShadowSample/far)), 1.0);
 #endif
 	return shadow;
 }

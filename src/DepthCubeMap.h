@@ -44,6 +44,7 @@ public:
 		}
 		shadowShader.add_uniform("lightPosition");
 		shadowShader.add_uniform("far");
+		shadowShader.add_uniform("model");
 	}
 	void use(glm::vec3 lightPosition) {
 		GLfloat aspect = (GLfloat)SHADOW_WIDTH / (GLfloat)SHADOW_HEIGHT;

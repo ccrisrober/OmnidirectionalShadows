@@ -34,7 +34,7 @@ void SimpleScene::initScene() {
 		colors.push_back(glm::vec3(r, g, b));
 	}
 
-	randomNumber = std::rand();
+	randomNumber = 1234;// std::rand();
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
@@ -43,7 +43,7 @@ void SimpleScene::initScene() {
 
 
 void SimpleScene::update( float t ) {
-	if (animating()) {
+	if (!animating()) {
 		angle = (angle > 3.141592f * 2.0f) ? 0 : angle + 0.001f / 3 * t;
 		lightPosition.x = sin(glfwGetTime() * 0.5) * 5.0;
 		lightPosition.z = cos(glfwGetTime() * 0.5) * 5.0;
@@ -124,7 +124,7 @@ void SimpleScene::drawScene(SimpleGLShader& shader) {
 
 	shader.send_uniform_b("cartoon", true);
 
-	// G3D Code (Marcos García Lorenzo)
+	// G3D Code (Marcos García Lorenzo) (modified)
 	std::srand(randomNumber);
 	for (unsigned int i = 0; i < numObjects; i++) {
 		float size = float(std::rand() % 3 + 1);
