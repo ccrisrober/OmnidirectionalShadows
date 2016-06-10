@@ -1,6 +1,7 @@
 #version 430 core
 
 //#define ONLY_SHADOW
+//#define FOG
 
 out vec4 outColor;
 
@@ -113,6 +114,18 @@ void main() {
 	vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * color;    
 	
 #ifndef ONLY_SHADOW
+	#ifdef FOG
+		float maxDist = 50.0;
+		float minDist = 1.0;
+		vec3 fogColor = vec3(1.0);
+		float densityFog = 0.04;
+		float dst = length( outPosition - viewPos );
+		float fogFactor = (maxDist - dst) / (maxDist - minDist);
+		float fogFactorExp = exp(-densityFog * dst);
+		float fogFactorExp2 = exp(-pow(densityFog * dst, 2.0)); 
+		fogFactor = clamp(fogFactor, 0.0, 1.0);
+		lighting = mix(fogColor, lighting, fogFactor);
+	#endif
 	outColor = vec4(lighting, 1.0);
 #endif
 }
